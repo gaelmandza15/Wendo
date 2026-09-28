@@ -126,6 +126,59 @@ verifier('licence remboursée → révoquée (piège n°6)', r6.ok === false && 
 
 globalThis.fetch = vraiFetch;
 
+const repondreStatut = (corps) => async () => new Response(JSON.stringify(corps), { status: 200, headers: { 'content-type': 'application/json' } });
+
+console.log('');
+console.log('--- Licence neuve, jamais activée (état réel après un achat) ---');
+/* Relevé sur l'API réelle pour une clé tout juste vendue : `is_active` est
+   `false` et le statut vaut `pending_activation`. Prendre `is_active` pour un
+   signal de révocation refusait la toute première activation. */
+const LIC_NEUVE = {
+  data: {
+    id: 'license_ye19id',
+    license: { key: 'DB7D-VDLK-MITJ-QLQL-16NH' },
+    product: { id: 'prd_wjpxwc3x', name: 'Wendo' },
+    status: 'pending_activation',
+    is_active: false,
+    is_expired: false,
+    can_activate: true,
+    activated_at: null,
+    expires_at: null,
+    activations: { count: 0, max: 1, remaining: 1 },
+  },
+};
+
+globalThis.fetch = repondreStatut(LIC_NEUVE);
+const n1 = await verifierUpstream({ PROVIDER_API_KEY: 'x' }, 'DB7D-VDLK-MITJ-QLQL-16NH');
+verifier('licence neuve → acceptée malgré is_active=false (piège n°7)', n1.ok === true, JSON.stringify(n1));
+
+/* L'activation doit aussi aboutir : un GET de contrôle puis le POST d'activation */
+let appels = 0;
+globalThis.fetch = async (url, options) => {
+  appels++;
+  if (options && options.method === 'POST') {
+    return new Response(JSON.stringify({
+      data: { license_key: 'DB7D-VDLK-MITJ-QLQL-16NH', status: 'active', is_active: true },
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  }
+  return new Response(JSON.stringify(LIC_NEUVE), { status: 200, headers: { 'content-type': 'application/json' } });
+};
+const n2 = await activerUpstream({ PROVIDER_API_KEY: 'x' }, 'DB7D-VDLK-MITJ-QLQL-16NH', 'A1B2-C3D4');
+verifier('activation d\'une clé neuve → jeton accordé', n2.ok === true, JSON.stringify(n2));
+verifier('activation d\'une clé neuve → contrôle puis activation', appels === 2, 'appels=' + appels);
+
+/* Le statut doit primer sur is_active dans les deux sens */
+globalThis.fetch = repondreStatut({ data: { license: { key: 'X' }, product: { id: 'prd_wjpxwc3x' }, status: 'refunded', is_active: true } });
+const n3 = await verifierUpstream({ PROVIDER_API_KEY: 'x' }, 'ABC-123-XYZ');
+verifier('statut remboursé prime sur is_active=true', n3.ok === false && n3.sentinelle === 'revoked', JSON.stringify(n3));
+
+/* Un statut inconnu ne doit pas bloquer un client */
+globalThis.fetch = repondreStatut({ data: { license: { key: 'X' }, product: { id: 'prd_wjpxwc3x' }, status: 'statut_nouveau', is_active: false } });
+const n4 = await verifierUpstream({ PROVIDER_API_KEY: 'x' }, 'ABC-123-XYZ');
+verifier('statut inconnu → laissé passer (jamais bloquer sur un libellé)', n4.ok === true, JSON.stringify(n4));
+
+globalThis.fetch = vraiFetch;
+
 
 console.log('');
 console.log('--- Appartenance au produit Wendo ---');

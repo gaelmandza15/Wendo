@@ -138,20 +138,34 @@ function extraire(json) {
   const licence = data.license || {};
   const produit = data.product || {};
   const activations = data.activations || {};
+  const statut = data.status || '';
   return {
     key: data.license_key || licence.key || '',
     /* Identifiant du produit auquel cette licence appartient : c'est lui qui
        empêche une clé d'un autre logiciel d'activer Wendo. */
     produitId: produit.id || data.product_id || '',
     produitNom: produit.name || '',
-    statut: data.status || '',
-    inactive: data.is_active === false,
-    expiree: data.is_expired === true,
+    statut,
+    /* `is_active` vaut `false` sur une licence NEUVE, avant sa première
+       activation — c'est l'état normal d'une clé qui vient d'être vendue, pas
+       une révocation. S'en servir comme signal avait pour effet de refuser
+       toute première activation. Le seul indicateur fiable est `status` :
+       `pending_activation` = jamais activée, donc activable. */
+    inactive: statutRevocatrice(statut),
+    expiree: data.is_expired === true || statut === 'expired',
     activationPossible: data.can_activate !== false,
     restantes: typeof activations.remaining === 'number' ? activations.remaining : null,
     expiration: data.expires_at || 0,
   };
 }
+
+/* Statuts par lesquels Chariow signale une licence qui ne doit plus servir :
+   remboursement, litige, ou désactivation par le vendeur.
+   On raisonne par liste d'exclusion plutôt que sur `is_active`, car un statut
+   inconnu doit rester activable : bloquer un client à cause d'un libellé
+   nouveau serait plus grave que laisser passer une clé douteuse. */
+const STATUTS_REVOQUES = ['refunded', 'revoked', 'cancelled', 'canceled', 'disputed', 'chargeback', 'inactive'];
+const statutRevocatrice = (statut) => STATUTS_REVOQUES.includes(String(statut || '').toLowerCase());
 
 /**
  * Vrai si la licence appartient bien au produit attendu.
