@@ -1,0 +1,24 @@
+# Serveur de licences Wendo — configuration Cloudflare Workers
+#
+# Déploiement :
+#   npx wrangler secret put LICENSE_PRIVATE_KEY
+#   npx wrangler secret put PROVIDER_API_KEY
+#   npx wrangler deploy
+
+name = "wendo-licences"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Aucune base de données, aucun stockage : le serveur est sans état.
+# Il détient la clé privée Ed25519 et signe des jetons, rien de plus.
+
+[vars]
+# Fournisseur de paiement (adaptateur Chariow)
+PROVIDER = "chariow"
+# URL de l'API du fournisseur
+PROVIDER_URL = "https://api.chariow.com/v1"
+
+# [observability] permet de voir les erreurs dans le tableau de bord Cloudflare.
+# Utile au démarrage ; à désactiver ensuite si vous préférez la discrétion.
+[observability]
+enabled = true

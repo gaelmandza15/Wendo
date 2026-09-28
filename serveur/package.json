@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "wrangler": "^4.142.0"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test-fournisseur": "node test-fournisseur.mjs",
+    "test-signature": "node test-signature-locale.mjs",
+    "test-vecteur": "node test-vecteur-croise.mjs"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "identifier": "default",
+  "description": "Capacités accordées à la fenêtre principale de Wendo",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-save",
+    "dialog:allow-open",
+    "dialog:allow-message",
+    "dialog:allow-ask"
+  ]
+}

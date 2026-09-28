@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wendo — Gestion du pointage employés</title>
+
+<!-- Tailwind (copie locale : l'outil doit fonctionner 100 % hors ligne) -->
+<script src="vendor/tailwind.js"></script>
+<!-- API de l'application de bureau (absente quand index.html est ouvert dans un
+     navigateur : le code teste sa présence avant de s'en servir) -->
+<script src="vendor/tauri-api.js"></script>
+<!-- Module Excel pour l'export .xlsx (copie locale, aucune requête réseau) -->
+<script src="vendor/xlsx.full.min.js"></script>
+<!-- Compression ZIP (écriture et lecture des .docx) et aperçu fidèle Word -->
+<script src="vendor/fflate.js"></script>
+<script src="vendor/jszip.js"></script>
+<script src="vendor/docx-preview.js"></script>
+<!-- Police Inter (fichiers .woff2 embarqués dans vendor/fonts) -->
+<link rel="stylesheet" href="vendor/inter.css">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/editeur-document.css">
+</head>
+
+<body class="min-w-[1200px] bg-[#050505] text-white antialiased">
+
+<!-- Les icônes SVG (symbols) sont injectées par js/ui/icons.js -->
+
+<div class="flex min-h-screen">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="fixed inset-y-0 left-0 z-20 flex w-72 flex-col overflow-hidden border-r border-white/5 bg-[#070707] px-5 py-7">
+    <!-- halo décoratif -->
+    <div class="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rotate-[25deg] bg-gradient-to-tr from-white/[0.07] to-transparent blur-3xl"></div>
+
+    <div class="flex items-start px-2">
+      <span id="sidebar-logo"></span>
+    </div>
+    <div class="pp-titre-texte mt-4 px-2">
+      <p class="text-xl font-bold tracking-tight">Wendo</p>
+      <p id="sidebar-etablissement" class="mt-1 text-xs text-white/40" data-i18n="app.slogan">Le temps, c'est la performance.</p>
+    </div>
+
+    <nav class="mt-9 flex-1 space-y-1.5">
+      <a href="#/dashboard" data-route="dashboard">
+        <svg class="h-5 w-5"><use href="#i-home"/></svg> <span class="pp-nav-label" data-i18n="nav.dashboard">Tableau de bord</span>
+      </a>
+      <a href="#/pointage" data-route="pointage">
+        <svg class="h-5 w-5"><use href="#i-clock"/></svg> <span class="pp-nav-label" data-i18n="nav.pointage">Pointage</span>
+      </a>
+      <a href="#/employes" data-route="employes">
+        <svg class="h-5 w-5"><use href="#i-users"/></svg> <span class="pp-nav-label" data-i18n="nav.employes">Employés</span>
+      </a>
+      <a href="#/calendrier" data-route="calendrier">
+        <svg class="h-5 w-5"><use href="#i-calendar"/></svg> <span class="pp-nav-label" data-i18n="nav.calendrier">Calendrier</span>
+      </a>
+      <a href="#/absences" data-route="absences">
+        <svg class="h-5 w-5"><use href="#i-cal-x"/></svg> <span class="pp-nav-label" data-i18n="nav.absences">Absences</span>
+      </a>
+      <a href="#/recapitulatif" data-route="recapitulatif">
+        <svg class="h-5 w-5"><use href="#i-chart"/></svg> <span class="pp-nav-label" data-i18n="nav.recapitulatif">Récapitulatif</span>
+      </a>
+      <a href="#/rapports" data-route="rapports">
+        <svg class="h-5 w-5"><use href="#i-doc"/></svg> <span class="pp-nav-label" data-i18n="nav.rapports">Rapports</span>
+      </a>
+      <a href="#/parametres" data-route="parametres">
+        <svg class="h-5 w-5"><use href="#i-gear"/></svg> <span class="pp-nav-label" data-i18n="nav.parametres">Paramètres</span>
+      </a>
+      <a href="#/guide" data-route="guide">
+        <svg class="h-5 w-5"><use href="#i-book"/></svg> <span class="pp-nav-label" data-i18n="nav.guide">Guide d'utilisation</span>
+      </a>
+    </nav>
+
+    <div class="pp-version mt-6 flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3">
+      <img src="assets/logo.png" alt="" class="h-6 w-6 object-contain opacity-90">
+      <div>
+        <p class="text-xs font-medium text-white/70" data-i18n="app.version">Wendo v1.0</p>
+        <p class="text-[10px] text-white/35" data-i18n="app.signature">Simple. Fiable. Efficace.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENU PRINCIPAL ===================== -->
+  <main class="relative ml-72 flex-1">
+    <!-- traînées lumineuses décoratives -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="absolute -top-48 right-[-6%] h-[900px] w-[420px] rotate-[28deg] bg-gradient-to-b from-white/[0.15] via-white/[0.04] to-transparent blur-2xl"></div>
+      <div class="absolute -top-24 right-[20%] h-[760px] w-[170px] rotate-[28deg] bg-gradient-to-b from-white/[0.09] via-white/[0.03] to-transparent blur-2xl"></div>
+      <div class="absolute top-[40%] right-[-4%] h-[560px] w-[250px] rotate-[28deg] bg-gradient-to-b from-white/[0.07] to-transparent blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-[1440px] px-10 py-8">
+
+      <!-- Barre du haut -->
+      <header class="flex items-center justify-between">
+        <p class="text-sm text-white/40">
+          <span id="header-semaine" data-i18n="app.semaine">Semaine</span> <span class="mx-1 text-white/20">·</span>
+          <span id="header-date" class="text-white/70">—</span>
+        </p>
+        <div class="flex items-center gap-4">
+          <!-- Invitation à activer : masquée dès que la licence est active -->
+          <button id="bouton-activer" class="hidden items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3.5 py-2 text-xs font-medium text-amber-200 transition hover:border-amber-400/50 hover:bg-amber-400/15" data-i18n-titre="licence.activerTitre">
+            <svg class="h-4 w-4"><use href="#i-power"/></svg>
+            <span data-i18n="licence.activer">Activer</span>
+          </button>
+          <button id="bouton-alertes" class="relative rounded-lg p-2 text-white/70 transition hover:bg-white/5 hover:text-white" title="Alertes" data-i18n-titre="nav.alertes">
+            <svg class="h-5 w-5"><use href="#i-bell"/></svg>
+            <span id="alertes-badge" class="absolute -right-0.5 -top-0.5 hidden h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">0</span>
+          </button>
+          <div class="h-8 w-px bg-white/10"></div>
+          <button id="bouton-compte" class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/5" title="Compte — cliquer pour se déconnecter" data-i18n-titre="nav.compte">
+            <span id="compte-initiales" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-white/30 to-white/10 text-sm font-semibold">—</span>
+            <span class="text-left">
+              <span id="compte-nom" class="block text-sm font-medium leading-tight">—</span>
+              <span id="compte-role" class="block text-xs text-white/40">—</span>
+            </span>
+            <svg class="h-4 w-4 text-white/50"><use href="#i-chev-down"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Les pages se rendent ici -->
+      <div id="page-root" class="mt-9"></div>
+
+      <footer id="pied-application" class="mt-10 flex items-center justify-between border-t border-white/5 pt-5 text-xs text-white/30">
+        <span data-i18n="app.piedBureau">Wendo v1.0 — données enregistrées sur ce poste</span>
+        <span data-i18n="app.sauvegardeAuto">Sauvegarde automatique : active</span>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<!-- Fondations -->
+<script src="js/core/utils.js"></script>
+<script src="js/core/store.js"></script>
+<script src="js/core/io.js"></script>
+<!-- Licences : vérification locale des jetons signés (bureau uniquement) -->
+<script src="js/core/licence.js"></script>
+<!-- Traductions : chargées avant les modules qui les utilisent -->
+<script src="js/i18n/i18n.js"></script>
+<script src="js/i18n/fr.js"></script>
+<script src="js/i18n/en.js"></script>
+<script src="js/core/dates.js"></script>
+<script src="js/core/time.js"></script>
+<script src="js/core/calculs.js"></script>
+<script src="js/core/alertes.js"></script>
+<script src="js/core/docx.js"></script>
+<script src="js/core/docx-lecture.js"></script>
+<script src="js/core/securite.js"></script>
+<!-- Interface -->
+<script src="js/ui/icons.js"></script>
+<script src="js/ui/components.js"></script>
+<script src="js/ui/editeur-document.js"></script>
+<script src="js/ui/centre-alertes.js"></script>
+<script src="js/ui/connexion.js"></script>
+<!-- Données -->
+<script src="js/data/settings.js"></script>
+<script src="js/data/motifs.js"></script>
+<script src="js/data/employes.js"></script>
+<script src="js/data/pointages.js"></script>
+<script src="js/data/absences.js"></script>
+<script src="js/data/sauvegardes.js"></script>
+<script src="js/data/messages.js"></script>
+<!-- Pages -->
+<script src="js/pages/calendrier.js"></script>
+<script src="js/pages/pointage.js"></script>
+<script src="js/pages/absences.js"></script>
+<script src="js/pages/dashboard.js"></script>
+<script src="js/pages/recapitulatif.js"></script>
+<script src="js/pages/rapports.js"></script>
+<script src="js/pages/parametres.js"></script>
+<script src="js/pages/guide.js"></script>
+<script src="js/pages/placeholders.js"></script>
+<script src="js/pages/employes.js"></script>
+<!-- Amorçage -->
+<script src="js/app.js"></script>
+
+</body>
+</html>

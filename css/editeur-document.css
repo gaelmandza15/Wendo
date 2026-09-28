@@ -1,0 +1,236 @@
+/* Wendo — aperçu modifiable des documents (rapports, récapitulatif).
+   L'aperçu est volontairement en « papier blanc » : ce que l'on voit est ce qui
+   sera exporté en Word et imprimé en PDF. */
+
+.ed-racine {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+}
+
+/* ---------- Barre d'outils ---------- */
+.ed-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .02);
+  padding: .6rem 1rem;
+}
+.ed-barre-groupe { display: flex; align-items: center; gap: .4rem; }
+.ed-barre-outils {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: .7rem;
+  background: rgba(255, 255, 255, .03);
+  padding: .2rem .3rem;
+}
+.ed-barre-actions { margin-left: auto; }
+.ed-barre-titre { font-size: .82rem; font-weight: 600; color: rgba(255, 255, 255, .9); }
+.ed-barre-sous-titre { font-size: .72rem; color: rgba(255, 255, 255, .35); margin-left: .4rem; }
+.ed-sep { width: 1px; height: 1.1rem; background: rgba(255, 255, 255, .12); margin: 0 .15rem; }
+
+.ed-outil {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  border-radius: .5rem;
+  padding: .3rem .5rem;
+  font-size: .72rem;
+  color: rgba(255, 255, 255, .6);
+  transition: background .12s, color .12s;
+}
+.ed-outil:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.ed-outil[data-actif="true"] { background: rgba(255, 255, 255, .92); color: #000; }
+.ed-outil-danger:hover { background: rgba(248, 113, 113, .16); color: #fca5a5; }
+.ed-outil-mot { font-size: .7rem; }
+.ed-italique { font-style: italic; font-weight: 600; font-size: .78rem; }
+
+.ed-champ { display: inline-flex; align-items: center; gap: .3rem; font-size: .7rem; color: rgba(255, 255, 255, .4); }
+.ed-select {
+  border-radius: .45rem;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+  padding: .22rem .4rem;
+  font-size: .7rem;
+  color: #fff;
+}
+.ed-select option { background: #0b0b0b; }
+
+.ed-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border-radius: .6rem;
+  border: 1px solid rgba(255, 255, 255, .12);
+  padding: .4rem .8rem;
+  font-size: .75rem;
+  color: rgba(255, 255, 255, .78);
+  transition: background .12s, color .12s;
+}
+.ed-bouton:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.ed-bouton-principal { border-color: transparent; background: #fff; color: #000; font-weight: 600; }
+.ed-bouton-principal:hover { background: rgba(255, 255, 255, .88); color: #000; }
+
+/* ---------- Scène et feuille ---------- */
+.ed-scene {
+  flex: 1;
+  overflow: auto;
+  padding: 2rem 1rem 4rem;
+  background:
+    radial-gradient(1200px 400px at 50% -10%, rgba(255, 255, 255, .05), transparent 70%),
+    #0a0a0a;
+}
+.ed-feuille {
+  margin: 0 auto;
+  background: #fff;
+  color: #111;
+  border-radius: .35rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .06);
+  font-family: 'Inter', Calibri, ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+  min-height: 24cm;
+}
+.ed-zone:focus, .ed-zone :focus { outline: none; }
+
+/* ---------- Contenu du document ---------- */
+.ed-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 2px solid #111;
+  padding-bottom: .5rem;
+  margin-bottom: 1rem;
+}
+.ed-logo { height: 2.4rem; width: 2.4rem; object-fit: contain; }
+.ed-entete-texte { text-align: right; }
+.ed-etablissement { font-size: .92rem; font-weight: 600; }
+.ed-genere { font-size: .68rem; color: #6b7280; }
+
+.ed-separateur {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #d4d4d8;
+  padding-bottom: .3rem;
+  margin-bottom: .8rem;
+}
+.ed-separateur-titre { font-size: 1.15rem; font-weight: 700; }
+.ed-separateur-date { font-size: .68rem; color: #6b7280; }
+
+.ed-titre { font-weight: 700; margin: 1.1rem 0 .35rem; }
+.ed-titre-1 { font-size: 1.15rem; border-bottom: 1px solid #d4d4d8; padding-bottom: .25rem; }
+.ed-titre-2 { font-size: 1rem; }
+.ed-titre-3 { font-size: .88rem; }
+
+.ed-paragraphe { margin: .28rem 0; font-size: .76rem; min-height: 1.1em; }
+.ed-paragraphe.ed-discret { font-size: .68rem; font-style: italic; color: #6b7280; }
+.ed-paragraphe.ed-avertissement { font-size: .7rem; color: #8a6d3b; }
+
+/* Tableaux : même géométrie qu'à l'export Word */
+.ed-tableau {
+  width: 100%;
+  border-collapse: collapse;
+  margin: .5rem 0 .8rem;
+  font-size: .7rem;
+}
+.ed-tableau th,
+.ed-tableau td {
+  border: 1px solid #d0d0d0;
+  padding: .22rem .35rem;
+  vertical-align: top;
+  white-space: pre-wrap;
+}
+.ed-tableau th { background: #f4f4f5; font-weight: 600; text-align: left; }
+.ed-tableau tfoot td { background: #f4f4f5; font-weight: 600; border-top: 2px solid #b8b8bd; }
+.ed-tableau td:empty::after { content: '\00a0'; }
+.ed-tableau tbody tr:hover td { background: #fafafa; }
+.ed-zone tbody tr.ed-ligne-choisie td { background: #eef6ff; }
+
+.ed-saut { height: 0; border-top: 1px dashed #cbd5e1; margin: 1rem 0; break-after: page; }
+
+/* Cellules et blocs sélectionnés */
+.ed-zone [data-ed]:focus-within { box-shadow: inset 0 0 0 1px rgba(59, 130, 246, .5); }
+.ed-zone .ed-titre:hover, .ed-zone .ed-paragraphe:hover { background: rgba(59, 130, 246, .04); }
+
+/* ---------- Pied de la fenêtre ---------- */
+.ed-pied {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .02);
+  padding: .5rem 1rem;
+  font-size: .7rem;
+  color: rgba(255, 255, 255, .45);
+}
+.ed-pied-sep { width: 1px; height: .9rem; background: rgba(255, 255, 255, .12); }
+.ed-pied-note { margin-left: auto; color: rgba(255, 255, 255, .3); }
+
+/* ---------- Confirmation intermédiaire (export) ---------- */
+.ed-dialogue {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, .6);
+  backdrop-filter: blur(4px);
+}
+.ed-dialogue-boite {
+  width: min(28rem, 92vw);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: #0b0b0b;
+  padding: 1.25rem 1.4rem;
+}
+.ed-dialogue-titre { font-size: .95rem; font-weight: 600; }
+.ed-dialogue-texte { margin-top: .45rem; font-size: .8rem; line-height: 1.5; color: rgba(255, 255, 255, .55); }
+.ed-dialogue-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.1rem; }
+
+/* ---------- Thème clair ---------- */
+.pp-clair .ed-racine { background: #f4f4f5; }
+.pp-clair .ed-barre, .pp-clair .ed-pied { background: #fff; border-color: #e4e4e7; }
+.pp-clair .ed-barre-titre, .pp-clair .ed-outil, .pp-clair .ed-bouton, .pp-clair .ed-select, .pp-clair .ed-champ { color: #3f3f46; }
+.pp-clair .ed-barre-outils { background: #fafafa; border-color: #e4e4e7; }
+.pp-clair .ed-outil:hover, .pp-clair .ed-bouton:hover { background: #f4f4f5; color: #18181b; }
+.pp-clair .ed-outil[data-actif="true"] { background: #18181b; color: #fff; }
+.pp-clair .ed-select { background: #fff; border-color: #d4d4d8; color: #18181b; }
+.pp-clair .ed-select option { background: #fff; color: #18181b; }
+.pp-clair .ed-scene { background: #e4e4e7; }
+.pp-clair .ed-dialogue-boite { background: #fff; border-color: #e4e4e7; }
+.pp-clair .ed-dialogue-titre { color: #18181b; }
+.pp-clair .ed-dialogue-texte { color: #52525b; }
+
+/* ---------- Petit écran ---------- */
+@media (max-width: 1150px) {
+  .ed-outil-mot, .ed-barre-sous-titre { display: none; }
+  .ed-pied-note { display: none; }
+}
+
+/* ---------- Impression : seule la feuille est imprimée ---------- */
+@media print {
+  .ed-barre, .ed-pied, .ed-dialogue { display: none !important; }
+  .ed-racine { position: static !important; background: #fff !important; display: block !important; }
+  .ed-scene { overflow: visible !important; padding: 0 !important; background: #fff !important; }
+  .ed-feuille {
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .ed-zone { font-size: 11pt !important; }
+  .ed-zone * { color: #000 !important; }
+  .ed-tableau { page-break-inside: auto; }
+  .ed-tableau tr { page-break-inside: avoid; }
+  .ed-tableau thead { display: table-header-group; }
+  .ed-saut { break-after: page; }
+}

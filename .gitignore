@@ -1,0 +1,21 @@
+# Compilation Rust
+/target/
+**/*.rs.bk
+
+# Front recopié pour le paquet Tauri (généré par outils-sync-front.cjs)
+/front/
+
+# Sortie des bundles Tauri
+/gen/
+
+# Divers
+Thumbs.db
+desktop.ini
+
+# --- Secrets de licence : NE JAMAIS VERSIONNER ---
+# Contient la clé privée Ed25519. Sa fuite permettrait à n'importe qui de
+# fabriquer des licences valides. Voir LICENSE_SYSTEM_BLUEPRINT.md §6.2.
+serveur/.dev.vars
+serveur/.env
+*.key
+keys/

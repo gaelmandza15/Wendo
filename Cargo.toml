@@ -1,0 +1,48 @@
+[package]
+name = "wendo"
+version = "1.0.0"
+description = "Wendo — gestion du pointage des employés"
+authors = ["Wendo"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "wendo_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# `protocol-asset` : nécessaire pour afficher des images situées hors du paquet
+# (logo de l'établissement choisi par l'utilisateur depuis un fichier local).
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# --- Licences ---
+# Signature Ed25519 (asymétrique) : l'application n'embarque que la clé PUBLIQUE,
+# donc extraire l'exécutable ne permet pas de fabriquer une licence.
+# Rust pur : aucune chaîne d'outils C à installer.
+ed25519-dalek = { version = "2", default-features = false, features = ["std", "fast"] }
+# Empreinte du code machine (identifiant de poste, sans donnée personnelle)
+sha2 = "0.10"
+# Encodage base64url des jetons
+base64 = "0.22"
+# Appels HTTP vers le serveur de licences (bloquant : appelé hors du runtime async)
+ureq = { version = "2", features = ["json", "tls"] }
+# Nécessaire pour `spawn_blocking` : exécuter l'appel réseau bloquant hors du
+# runtime asynchrone de Tauri (sans quoi l'activation reste figée, piège n°1).
+tokio = { version = "1", features = ["rt"] }
+
+# Sur Windows, on masque la console en release : l'utilisateur ne voit que la fenêtre.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
