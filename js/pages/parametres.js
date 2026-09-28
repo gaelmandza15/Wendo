@@ -288,7 +288,7 @@ PP.pages.parametres = (() => {
 
       <!-- Zone sensible -->
       <section class="mt-5 rounded-2xl border border-red-400/20 bg-red-400/[0.04] p-6">
-        <h2 class="flex items-center gap-2.5 font-semibold text-red-200">${icon('i-alert', 'h-5 w-5')} ${tx('parametres.zoneSensible.titre')}</h2>
+        <h2 class="flex items-center gap-2.5 font-semibold text-red-300">${icon('i-alert', 'h-5 w-5')} ${tx('parametres.zoneSensible.titre')}</h2>
         <div class="mt-4 flex flex-wrap items-center gap-3">
           <button id="par-reset-demo" class="pp-btn-ghost px-3 py-2 text-xs">${tx('parametres.zoneSensible.restaurerDemo')}</button>
           <button id="par-reset-tout" class="rounded-xl bg-red-500/90 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-red-500">${tx('parametres.zoneSensible.toutEffacer')}</button>

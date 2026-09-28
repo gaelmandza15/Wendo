@@ -112,9 +112,97 @@ body.pp-clair { background: #f4f4f5 !important; color: #18181b !important; }
 .pp-clair .pp-label { color: #71717a !important; }
 .pp-clair .pp-select option { background: #fff; color: #18181b; }
 .pp-clair ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .18); }
-.pp-clair .text-amber-200\/80, .pp-clair [class*="text-amber-2"] { color: #92400e !important; }
 .pp-clair .pp-btn-ghost { color: #3f3f46; }
 .pp-clair .pp-switch { background: #d4d4d8; }
+
+/* ---------- Contraste en thème clair ----------
+   Les teintes 200/300/400 de Tailwind sont calibrées pour un fond sombre ;
+   sur fond blanc elles tombent sous le seuil de lisibilité (les pastels
+   « amber », « teal » et « slate » sont les plus touchés). On les remplace
+   par leurs équivalents 600/700/800, qui gardent la famille de couleur tout
+   en repassant au-dessus du rapport de contraste du texte courant.
+   Le facteur « HS » et les icônes d'action reprennent la même règle : sans
+   elle, un simple survol les rendait presque invisibles. */
+.pp-clair [class*="text-slate-"]    { color: #334155 !important; }
+.pp-clair [class*="text-gray-"]     { color: #374151 !important; }
+.pp-clair [class*="text-zinc-"]     { color: #3f3f46 !important; }
+.pp-clair [class*="text-red-"]      { color: #b91c1c !important; }
+.pp-clair [class*="text-rose-"]     { color: #be123c !important; }
+.pp-clair [class*="text-amber-"]    { color: #92400e !important; }
+.pp-clair [class*="text-yellow-"]   { color: #854d0e !important; }
+.pp-clair [class*="text-orange-"]   { color: #9a3412 !important; }
+.pp-clair [class*="text-emerald-"]  { color: #047857 !important; }
+.pp-clair [class*="text-green-"]    { color: #15803d !important; }
+.pp-clair [class*="text-teal-"]     { color: #0f766e !important; }
+.pp-clair [class*="text-cyan-"]     { color: #0e7490 !important; }
+.pp-clair [class*="text-sky-"]      { color: #0369a1 !important; }
+.pp-clair [class*="text-blue-"]     { color: #1d4ed8 !important; }
+.pp-clair [class*="text-indigo-"]   { color: #4338ca !important; }
+.pp-clair [class*="text-violet-"]   { color: #6d28d9 !important; }
+.pp-clair [class*="text-purple-"]   { color: #7e22ce !important; }
+.pp-clair [class*="text-fuchsia-"]  { color: #a21caf !important; }
+.pp-clair [class*="text-pink-"]     { color: #be185d !important; }
+
+/* Les aplats colorés très transparents (10 %) disparaissent sur blanc et la
+   pastille se réduit alors à son texte. On les rend légèrement plus présents.
+   L'aiguillage se fait sur l'opacité : la même teinte sert de fond translucide
+   et de pastille pleine, et seule la classe d'opacité les distingue. */
+.pp-clair [class*="bg-slate-400\/"], .pp-clair [class*="bg-gray-400\/"], .pp-clair [class*="bg-zinc-400\/"] { background-color: rgba(100, 116, 139, .20) !important; }
+.pp-clair [class*="bg-red-400\/"], .pp-clair [class*="bg-rose-400\/"]                                       { background-color: rgba(244, 63, 94, .16) !important; }
+.pp-clair [class*="bg-amber-400\/"], .pp-clair [class*="bg-yellow-400\/"], .pp-clair [class*="bg-orange-400\/"] { background-color: rgba(245, 158, 11, .22) !important; }
+.pp-clair [class*="bg-emerald-400\/"], .pp-clair [class*="bg-green-400\/"], .pp-clair [class*="bg-teal-400\/"] { background-color: rgba(16, 185, 129, .18) !important; }
+.pp-clair [class*="bg-sky-400\/"], .pp-clair [class*="bg-cyan-400\/"], .pp-clair [class*="bg-blue-400\/"]    { background-color: rgba(14, 165, 233, .18) !important; }
+.pp-clair [class*="bg-violet-400\/"], .pp-clair [class*="bg-purple-400\/"], .pp-clair [class*="bg-indigo-400\/"] { background-color: rgba(139, 92, 246, .18) !important; }
+.pp-clair [class*="bg-pink-400\/"], .pp-clair [class*="bg-fuchsia-400\/"]                                   { background-color: rgba(236, 72, 153, .16) !important; }
+
+/* Pastilles pleines (points de statut, segments de barres) : les teintes 300
+   et 400 passées à 600 restent reconnaissables sans baver sur le blanc.
+   Les sélecteurs ci-dessous portent sur la classe entière, sans caractère
+   générique : une règle comme `[class*="bg-sky-400"]` engloberait aussi les
+   fonds translucides ci-dessus, et l'ordre des feuilles départagerait alors
+   les deux `!important` en défaveur du fond (Tailwind s'injecte après ce
+   fichier). On nomme donc les opacités pleines une à une. */
+.pp-clair .bg-red-400, .pp-clair .bg-red-500,
+.pp-clair .bg-rose-400, .pp-clair .bg-rose-500       { background-color: #e11d48 !important; }
+.pp-clair .bg-amber-400, .pp-clair .bg-amber-500     { background-color: #d97706 !important; }
+.pp-clair .bg-emerald-400, .pp-clair .bg-emerald-500 { background-color: #059669 !important; }
+.pp-clair .bg-teal-400, .pp-clair .bg-teal-500       { background-color: #0d9488 !important; }
+.pp-clair .bg-sky-400, .pp-clair .bg-sky-500         { background-color: #0284c7 !important; }
+.pp-clair .bg-violet-400, .pp-clair .bg-violet-500   { background-color: #7c3aed !important; }
+.pp-clair .bg-pink-400, .pp-clair .bg-pink-500       { background-color: #db2777 !important; }
+.pp-clair .bg-slate-400, .pp-clair .bg-gray-400      { background-color: #64748b !important; }
+.pp-clair .bg-red-400\/60 { background-color: rgba(220, 38, 38, .60) !important; }
+
+/* Les barres de progression passent sous les positions absolues des
+   pourcentages : leur piste blanche devient un vrai repère, et les libellés
+   posés dessus restent lisibles. */
+.pp-clair [class*="bg-white/5"], .pp-clair [class*="bg-white/10"] { background-color: #e4e4e7 !important; }
+
+/* Libellés désactivés et textes purement décoratifs : un cran plus sombres
+   que le gris par défaut du thème, sinon ils se confondent avec le fond. */
+.pp-clair [class*="text-white/2"], .pp-clair [class*="text-white/3"] { color: #71717a !important; }
+.pp-clair [class*="text-white/4"], .pp-clair [class*="text-white/5"] { color: #52525b !important; }
+
+/* Bouton « Activer » de l'en-tête : il pose un texte ambre sur un aplat ambre,
+   donc son contraste ne dépend pas du fond de la page. En thème clair les deux
+   teintes se rapprochent et le libellé s'efface ; on assombrit le texte et on
+   renforce le cadre pour qu'il reste un bouton identifiable. */
+.pp-clair #bouton-activer {
+  color: #78350f !important;
+  border-color: #b45309 !important;
+  background-color: rgba(245, 158, 11, .18) !important;
+}
+.pp-clair #bouton-activer:hover {
+  color: #451a03 !important;
+  border-color: #92400e !important;
+  background-color: rgba(245, 158, 11, .30) !important;
+}
+
+/* Zone sensible : son aplat rouge est calibré pour un fond noir (4 %
+   d'opacité sur du blanc est invisible). On le rend perceptible sans le
+   transformer en bandeau d'alerte, et l'icône d'avertissement reprend la
+   teinte 700 suffisamment foncée pour être lue. */
+.pp-clair section.bg-red-400\/\[0\.04\] { background-color: rgba(239, 68, 68, .07) !important; border-color: rgba(239, 68, 68, .35) !important; }
 
 /* ---------- Texte agrandi ---------- */
 body.pp-texte-grand { font-size: 112.5%; }
